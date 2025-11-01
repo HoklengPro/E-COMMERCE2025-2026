@@ -1,9 +1,10 @@
-  <template>
+<template>
   <div class="promotion-card" :style="{ backgroundColor:  bgColor }">
     <div class="text">
       <h3 :style="{ color: titleColor }">{{ title }}</h3>
       <p>{{ description }}</p>
-      <slot></slot>
+      <!-- Capture click from the button in the slot -->
+      <slot @click="handleShopNow"></slot>
     </div>
     <div class="image-container" :style="{ backgroundColor: imageBackgroundColor }">
       <img
@@ -18,7 +19,6 @@
 </template>
 
 <script setup>
-
 import { ref, onMounted } from 'vue'
 
 const props = defineProps({
@@ -44,6 +44,8 @@ const props = defineProps({
   },
 })
 
+const emit = defineEmits(['shop'])
+
 const imageRef = ref(null)
 const extractedColor = ref(null)
 
@@ -63,28 +65,20 @@ const extractColorFromImage = () => {
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
     const data = imageData.data
 
-    // Sample colors from the image (every 10th pixel for performance)
     const colors = []
     for (let i = 0; i < data.length; i += 40) {
-      // RGBA = 4 bytes per pixel, sample every 10th pixel
       const r = data[i]
       const g = data[i + 1]
       const b = data[i + 2]
       const a = data[i + 3]
-
-      // Skip transparent pixels
-      if (a > 128) {
-        colors.push({ r, g, b })
-      }
+      if (a > 128) colors.push({ r, g, b })
     }
 
     if (colors.length > 0) {
-      // Calculate average color
-      const avgR = Math.round(colors.reduce((sum, color) => sum + color.r, 0) / colors.length)
-      const avgG = Math.round(colors.reduce((sum, color) => sum + color.g, 0) / colors.length)
-      const avgB = Math.round(colors.reduce((sum, color) => sum + color.b, 0) / colors.length)
+      const avgR = Math.round(colors.reduce((sum, c) => sum + c.r, 0) / colors.length)
+      const avgG = Math.round(colors.reduce((sum, c) => sum + c.g, 0) / colors.length)
+      const avgB = Math.round(colors.reduce((sum, c) => sum + c.b, 0) / colors.length)
 
-      // Convert to hex
       const hexR = avgR.toString(16).padStart(2, '0')
       const hexG = avgG.toString(16).padStart(2, '0')
       const hexB = avgB.toString(16).padStart(2, '0')
@@ -96,6 +90,10 @@ const extractColorFromImage = () => {
   }
 }
 
+const handleShopNow = () => {
+  emit('shop', props.title) // emits the promotion title to App.vue
+}
+
 onMounted(() => {
   if (imageRef.value && imageRef.value.complete) {
     extractColorFromImage()
@@ -104,6 +102,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
+/* Your existing CSS is completely untouched */
 .promotion-card {
   display: flex;
   align-items: center;

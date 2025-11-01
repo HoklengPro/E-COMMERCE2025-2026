@@ -1,17 +1,25 @@
 <template>
-  <button class="shop-btn" :style="{ backgroundColor: color }">
+  <button class="shop-btn" :style="{ backgroundColor: color }" @click="handleClick">
     {{ label }}
   </button>
 </template>
 
 <script setup>
-defineProps({
+import { defineEmits, defineProps } from 'vue'
+
+const props = defineProps({
   label: String,
   color: {
     type: String,
     default: '#3bb77e'
   }
 })
+
+const emit = defineEmits(['click']) // emit a click event
+
+const handleClick = () => {
+  emit('click') // forward the click to parent
+}
 </script>
 
 <style scoped>
